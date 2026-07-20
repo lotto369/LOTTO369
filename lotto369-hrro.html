@@ -1,1 +1,325 @@
 
+<!DOCTYPE html>
+<!-- นำเข้าฟอนต์ Kanit -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap"
+  rel="stylesheet"
+/>
+
+<style>
+  /* สไตล์ CSS สำหรับการแสดงผลหน้าเว็บหลัก */
+  .lotto-board-horizontal {
+    font-family: "Kanit", sans-serif;
+    width: 100%;
+    height: 200px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(255, 107, 0, 0.15);
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    border: 1px solid #ffe0cc;
+    box-sizing: border-box;
+  }
+  .lotto-header-side {
+    background: linear-gradient(135deg, #ff8c00 0%, #ff5500 100%);
+    color: #ffffff;
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+  .lotto-header-side h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+  }
+  .lotto-header-side p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 300;
+    opacity: 0.95;
+    background-color: rgba(0, 0, 0, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .lotto-body-row {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    gap: 15px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+  }
+  .prize-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .prize-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  .prize-1-hz {
+    flex: 1.3;
+    background-color: #fff4ed;
+    border: 2px dashed #ff8c00;
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .prize-1-hz .prize-title {
+    color: #ff5500;
+  }
+  .prize-1-hz .number {
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: #333333;
+    letter-spacing: 4px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .lotto-3digit-group {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    gap: 10px;
+  }
+  .lotto-3digit-box {
+    flex: 1;
+    background-color: #fcfcfc;
+    border: 1px solid #eeeeee;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .lotto-3digit-box .prize-title {
+    color: #777777;
+    font-size: 1rem;
+    margin-bottom: 2px;
+  }
+  .lotto-3digit-box .number {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #333333;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .lotto-3digit-box .divider {
+    color: #ffb880;
+    margin: 0 8px;
+    font-weight: 300;
+  }
+  .prize-2-hz {
+    flex: 0.9;
+    background-color: #ffffff;
+    border: 1px solid #ffcca3;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(255, 85, 0, 0.05);
+  }
+  .prize-2-hz .prize-title {
+    color: #ff5500;
+  }
+  .prize-2-hz .number {
+    font-size: 4.2rem;
+    font-weight: 600;
+    color: #ff5500;
+    letter-spacing: 2px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .loading {
+    font-size: 1.5rem !important;
+    color: #999 !important;
+    letter-spacing: 0px !important;
+  }
+  @media (max-width: 800px) {
+    .lotto-board-horizontal {
+      height: auto;
+      flex-direction: column;
+    }
+    .lotto-header-side {
+      width: 100%;
+      flex: auto;
+      padding: 20px;
+    }
+    .lotto-body-row {
+      flex-direction: column;
+      gap: 20px;
+    }
+    .prize-1-hz,
+    .lotto-3digit-group,
+    .prize-2-hz {
+      width: 100%;
+      padding: 20px 10px;
+    }
+    .lotto-3digit-group {
+      gap: 15px;
+    }
+    .lotto-3digit-box {
+      padding: 15px 10px;
+    }
+  }
+</style>
+
+<div class="lotto-board-horizontal">
+  <div class="lotto-header-side">
+    <h2>ผลสลาก<br />กินแบ่งรัฐบาล</h2>
+    <p id="lotto-date">กำลังโหลด...</p>
+  </div>
+  <div class="lotto-body-row">
+    <div class="prize-box prize-1-hz">
+      <div class="prize-title">รางวัลที่ 1</div>
+      <div class="number loading" id="prize-1">...</div>
+    </div>
+    <div class="lotto-3digit-group">
+      <div class="lotto-3digit-box">
+        <div class="prize-title">เลขหน้า 3 ตัว</div>
+        <div class="number" id="prize-f3">
+          ... <span class="divider">|</span> ...
+        </div>
+      </div>
+      <div class="lotto-3digit-box">
+        <div class="prize-title">เลขท้าย 3 ตัว</div>
+        <div class="number" id="prize-b3">
+          ... <span class="divider">|</span> ...
+        </div>
+      </div>
+    </div>
+    <div class="prize-box prize-2-hz">
+      <div class="prize-title">เลขท้าย 2 ตัว</div>
+      <div class="number loading" id="prize-b2">..</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ฟังก์ชันช่วยทำความสะอาดข้อความ ลบเครื่องหมายปีกกา คอมม่า แร็กเก็ต หรือคำสั่งที่ติดมาจาก Supabase ให้เหลือแต่ตัวเลขเพียวๆ
+  function cleanLottoData(rawStr) {
+    if (!rawStr) return "";
+    let str = String(rawStr);
+
+    // ถ้าข้อมูลติดโครงสร้าง JSON มา ให้แกะเอาค่าข้างใน
+    if (str.includes("{") || str.includes("[")) {
+      try {
+        // ดึงเฉพาะตัวเลขและเครื่องหมายคอมม่าออกมา
+        const match =
+          str.match(/"(code|code1|code2)":"([^"]+)"/) ||
+          str.match(/:\[?([^\]}]+)\]?/);
+        if (match) str = match[2] || match[1];
+      } catch (e) {}
+    }
+
+    // ล้างเครื่องหมายที่ไม่เกี่ยวข้อง และสเปซออกให้เหลือแต่ตัวเลขหรือคอมม่าแยกชุด
+    return str
+      .replace(/[{}\[\]"']/g, "")
+      .replace(/\s+/g, "")
+      .trim();
+  }
+
+  async function loadLatestLotto() {
+    const SUPABASE_URL = "https://wlkaezgzusyfwgxnfvtn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_Q2zX9R5kVCrtL4TA4KbmHw_CksebDJA";
+    const url = `${SUPABASE_URL}/rest/v1/lotto_results?select=*&order=draw_date.desc&limit=1`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        document.getElementById("lotto-date").innerText = "ไม่มีข้อมูล";
+        return;
+      }
+
+      const item = data[0];
+
+      // แปลงฟอร์แมตวันที่จาก YYYY-MM-DD เป็นภาษาไทยเต็ม
+      const thaiMonths = [
+        "มกราคม",
+        "กุมภาพันธ์",
+        "มีนาคม",
+        "เมษายน",
+        "พฤษภาคม",
+        "มิถุนายน",
+        "กรกฎาคม",
+        "สิงหาคม",
+        "กันยายน",
+        "ตุลาคม",
+        "พฤศจิกายน",
+        "ธันวาคม",
+      ];
+      let dateText = item.draw_date;
+      if (item.draw_date) {
+        const parts = String(item.draw_date).replace(/[{"}]/g, "").split("-");
+        if (parts.length === 3) {
+          const y = parseInt(parts[0]);
+          const m = parseInt(parts[1]) - 1;
+          const d = parseInt(parts[2]);
+          const thYear = y < 2500 ? y + 543 : y;
+          dateText = `${d} ${thaiMonths[m]} ${thYear}`;
+        }
+      }
+
+      // ทำความสะอาดข้อมูลแต่ละส่วนก่อนแสดงผล
+      const p1Raw = cleanLottoData(item.prize_1).replace(/,/g, "");
+      const f3Raw = cleanLottoData(item.front_3);
+      const b3Raw = cleanLottoData(item.back_3);
+      const b2Raw = cleanLottoData(item.last_2).replace(/,/g, "");
+
+      // ฟังก์ชันสำหรับจัดรูปแบบเลข 3 ตัว
+      const formatThreeDigits = (cleanedStr) => {
+        if (!cleanedStr) return "... <span class='divider'>|</span> ...";
+        const parts = cleanedStr.split(",");
+        if (parts.length >= 2)
+          return `${parts[0]} <span class="divider">|</span> ${parts[1]}`;
+        // กรณีไม่มีคอมม่าแต่พิมพ์ยาวติดกัน 6 หลัก
+        if (cleanedStr.length === 6)
+          return `${cleanedStr.substring(
+            0,
+            3
+          )} <span class="divider">|</span> ${cleanedStr.substring(3, 6)}`;
+        return cleanedStr;
+      };
+
+      // ยิงข้อมูลที่คลีนเสร็จแล้วเข้าสู่ HTML
+      document.getElementById("lotto-date").innerText = dateText;
+      document.getElementById("prize-1").innerText = p1Raw || "------";
+      document.getElementById("prize-f3").innerHTML = formatThreeDigits(f3Raw);
+      document.getElementById("prize-b3").innerHTML = formatThreeDigits(b3Raw);
+      document.getElementById("prize-b2").innerText = b2Raw || "--";
+
+      // เอาสถานะ Loading ออก
+      document.getElementById("prize-1").classList.remove("loading");
+      document.getElementById("prize-b2").classList.remove("loading");
+    } catch (error) {
+      console.error("Error connecting to Supabase:", error);
+      document.getElementById("lotto-date").innerText = "การเชื่อมต่อขัดข้อง";
+    }
+  }
+
+  loadLatestLotto();
+</script>

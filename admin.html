@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบหลังบ้าน - แอดมินตรวจหวย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .admin-container { max-width: 500px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #ff5500; margin-bottom: 25px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #555; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: 'Prompt', sans-serif; font-size: 16px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #ff8c00 0%, #ff5500 100%); color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+        #status-msg { text-align: center; margin-top: 15px; font-weight: 500; font-size: 14px; }
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h2>แผงควบคุมแอดมิน (คีย์ผลหวย)</h2>
+    <form id="lotto-form">
+        <div class="form-group">
+            <label>ประจำงวดวันที่</label>
+            <input type="date" id="draw_date" required>
+        </div>
+        
+        <div class="form-group">
+            <label>รางวัลที่ 1 (6 หลัก)</label>
+            <input type="text" id="prize_1" maxlength="6" placeholder="เช่น 639214" required>
+        </div>
+
+        <div class="form-group">
+            <label>เลขหน้า 3 ตัว (กรอก 2 ชุด)</label>
+            <div class="grid-2">
+                <input type="text" id="front_3_1" maxlength="3" placeholder="ชุดที่ 1" required>
+                <input type="text" id="front_3_2" maxlength="3" placeholder="ชุดที่ 2" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>เลขท้าย 3 ตัว (กรอก 2 ชุด)</label>
+            <div class="grid-2">
+                <input type="text" id="back_3_1" maxlength="3" placeholder="ชุดที่ 1" required>
+                <input type="text" id="back_3_2" maxlength="3" placeholder="ชุดที่ 2" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>เลขท้าย 2 ตัว</label>
+            <input type="text" id="last_2" maxlength="2" placeholder="เช่น 71" required>
+        </div>
+
+        <button type="submit" id="submit-btn">บันทึกและอัปเดตหน้าเว็บ</button>
+    </form>
+    <div id="status-msg"></div>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://wlkaezgzusyfwgxnfvtn.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_Q2zX9R5kVCrtL4TA4KbmHw_CksebDJA";
+
+    document.getElementById('lotto-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submit-btn');
+        const status = document.getElementById('status-msg');
+        
+        btn.disabled = true;
+        btn.innerText = "กำลังบันทึก...";
+        status.className = "";
+        status.innerText = "";
+
+        // รวมร่างเลข 3 ตัวให้เป็นฟอร์แมตข้อความแบบมีคอมม่าคั่น
+        const front3Combined = `${document.getElementById('front_3_1').value},${document.getElementById('front_3_2').value}`;
+        const back3Combined = `${document.getElementById('back_3_1').value},${document.getElementById('back_3_2').value}`;
+
+        const payload = {
+            draw_date: document.getElementById('draw_date').value,
+            prize_1: document.getElementById('prize_1').value,
+            front_3: front3Combined,
+            back_3: back3Combined,
+            last_2: document.getElementById('last_2').value
+        };
+
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/lotto_results`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates' // เขียนทับถ้าเจอวันที่ซ้ำ
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                status.className = "success";
+                status.innerText = "🎉 บันทึกข้อมูลสำเร็จ! หน้าเว็บหลักจะเปลี่ยนตามทันที";
+                document.getElementById('lotto-form').reset();
+            } else {
+                throw new Error("ส่งข้อมูลไม่สำเร็จ");
+            }
+        } catch (err) {
+            status.className = "error";
+            status.innerText = "❌ เกิดข้อผิดพลาด กรุณาตรวจสอบสิทธิ์การเขียนข้อมูลใน Supabase";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "บันทึกและอัปเดตหน้าเว็บ";
+        }
+    });
+</script>
+</body>
+</html>
